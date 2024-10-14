@@ -83,11 +83,11 @@ fig = make_subplots(rows=3, cols=1, subplot_titles=("Temperature", "Precipitatio
 
 # Temperature plot
 fig.add_trace(go.Scatter(x=dallas_data['date'], y=dallas_data['temperature_max'], name="Dallas Max Temp", line=dict(color="red")), row=1, col=1)
-fig.add_trace(go.Scatter(x=dallas_data['date'], y=dallas_data['temperature_min'], name="Dallas Min Temp", line=dict(color="blue")), row=1, col=1)
+# fig.add_trace(go.Scatter(x=dallas_data['date'], y=dallas_data['temperature_min'], name="Dallas Min Temp", line=dict(color="blue")), row=1, col=1)
 fig.add_trace(go.Scatter(x=orlando_data['date'], y=orlando_data['temperature_max'], name="Orlando Max Temp", line=dict(color="orange")), row=1, col=1)
-fig.add_trace(go.Scatter(x=orlando_data['date'], y=orlando_data['temperature_min'], name="Orlando Min Temp", line=dict(color="lightblue")), row=1, col=1)
+# fig.add_trace(go.Scatter(x=orlando_data['date'], y=orlando_data['temperature_min'], name="Orlando Min Temp", line=dict(color="lightblue")), row=1, col=1)
 fig.add_trace(go.Scatter(x=omaha_data['date'], y=omaha_data['temperature_max'], name="Omaha Max Temp", line=dict(color="green")), row=1, col=1)
-fig.add_trace(go.Scatter(x=omaha_data['date'], y=omaha_data['temperature_min'], name="Omaha Min Temp", line=dict(color="lightgreen")), row=1, col=1)
+# fig.add_trace(go.Scatter(x=omaha_data['date'], y=omaha_data['temperature_min'], name="Omaha Min Temp", line=dict(color="lightgreen")), row=1, col=1)
 
 # Precipitation plot
 fig.add_trace(go.Bar(x=dallas_data['date'], y=dallas_data['precipitation'], name="Dallas Precipitation", marker_color="red"), row=2, col=1)
