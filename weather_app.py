@@ -75,8 +75,8 @@ if dallas_data.empty or orlando_data.empty or omaha_data.empty:
     st.error("No data available for the selected date range. Please try a different range.")
     st.stop()
 
-if dallas_data.isna().any().any() or orlando_data.isna().any().any() or omaha_data.isna().any().any():
-    st.warning("Some data points are missing. The visualization may be incomplete.")
+# if dallas_data.isna().any().any() or orlando_data.isna().any().any() or omaha_data.isna().any().any():
+#     st.warning("Some data points are missing. The visualization may be incomplete.")
 
 # Create comparison plots
 fig = make_subplots(rows=3, cols=1, subplot_titles=("Temperature", "Precipitation", "Wind Speed"))
