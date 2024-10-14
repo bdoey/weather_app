@@ -8,10 +8,21 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 
+
 # Setup the Open-Meteo API client with cache and retry on error
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
 retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
 openmeteo = openmeteo_requests.Client(session=retry_session)
+
+# Conversion functions
+def celsius_to_fahrenheit(celsius):
+    return (celsius * 9/5) + 32
+
+def mm_to_inches(mm):
+    return mm / 25.4
+
+def kmh_to_mph(kmh):
+    return kmh / 1.60934
 
 def fetch_weather_data(latitude, longitude, start_date, end_date):
     url = "https://archive-api.open-meteo.com/v1/archive"
@@ -44,7 +55,15 @@ def fetch_weather_data(latitude, longitude, start_date, end_date):
             if key != "date" and len(daily_data[key]) < len(date_range):
                 daily_data[key] = np.pad(daily_data[key], (0, len(date_range) - len(daily_data[key])), 'constant', constant_values=np.nan)
         
-        return pd.DataFrame(daily_data)
+        df = pd.DataFrame(daily_data)
+        
+        # Convert to imperial units
+        df['temperature_max'] = df['temperature_max'].apply(celsius_to_fahrenheit)
+        df['temperature_min'] = df['temperature_min'].apply(celsius_to_fahrenheit)
+        df['precipitation'] = df['precipitation'].apply(mm_to_inches)
+        df['windspeed_max'] = df['windspeed_max'].apply(kmh_to_mph)
+        
+        return df
     except Exception as e:
         st.error(f"Error fetching data: {str(e)}")
         return pd.DataFrame()
@@ -101,9 +120,9 @@ fig.add_trace(go.Scatter(x=omaha_data['date'], y=omaha_data['windspeed_max'], na
 
 fig.update_layout(height=900, width=800, title_text="Weather Comparison: Dallas vs Orlando vs Omaha")
 fig.update_xaxes(title_text="Date", row=3, col=1)
-fig.update_yaxes(title_text="Temperature (°C)", row=1, col=1)
-fig.update_yaxes(title_text="Precipitation (mm)", row=2, col=1)
-fig.update_yaxes(title_text="Wind Speed (km/h)", row=3, col=1)
+fig.update_yaxes(title_text="Temperature (°F)", row=1, col=1)
+fig.update_yaxes(title_text="Precipitation (inches)", row=2, col=1)
+fig.update_yaxes(title_text="Wind Speed (mph)", row=3, col=1)
 
 st.plotly_chart(fig)
 
@@ -113,26 +132,24 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     st.write("Dallas Averages:")
-    st.write(f"Avg Max Temp: {dallas_data['temperature_max'].mean():.1f}°C")
-    st.write(f"Avg Min Temp: {dallas_data['temperature_min'].mean():.1f}°C")
-    st.write(f"Avg Precipitation: {dallas_data['precipitation'].mean():.1f}mm")
-    st.write(f"Avg Max Wind Speed: {dallas_data['windspeed_max'].mean():.1f}km/h")
+    st.write(f"Avg Max Temp: {dallas_data['temperature_max'].mean():.1f}°F")
+    st.write(f"Avg Min Temp: {dallas_data['temperature_min'].mean():.1f}°F")
+    st.write(f"Avg Precipitation: {dallas_data['precipitation'].mean():.2f} inches")
+    st.write(f"Avg Max Wind Speed: {dallas_data['windspeed_max'].mean():.1f} mph")
     st.write(f"Avg Max Humidity: {dallas_data['humidity_max'].mean():.1f}%")
 
 with col2:
     st.write("Orlando Averages:")
-    st.write(f"Avg Max Temp: {orlando_data['temperature_max'].mean():.1f}°C")
-    st.write(f"Avg Min Temp: {orlando_data['temperature_min'].mean():.1f}°C")
-    st.write(f"Avg Precipitation: {orlando_data['precipitation'].mean():.1f}mm")
-    st.write(f"Avg Max Wind Speed: {orlando_data['windspeed_max'].mean():.1f}km/h")
+    st.write(f"Avg Max Temp: {orlando_data['temperature_max'].mean():.1f}°F")
+    st.write(f"Avg Min Temp: {orlando_data['temperature_min'].mean():.1f}°F")
+    st.write(f"Avg Precipitation: {orlando_data['precipitation'].mean():.2f} inches")
+    st.write(f"Avg Max Wind Speed: {orlando_data['windspeed_max'].mean():.1f} mph")
     st.write(f"Avg Max Humidity: {orlando_data['humidity_max'].mean():.1f}%")
 
 with col3:
     st.write("Omaha Averages:")
-    st.write(f"Avg Max Temp: {omaha_data['temperature_max'].mean():.1f}°C")
-    st.write(f"Avg Min Temp: {omaha_data['temperature_min'].mean():.1f}°C")
-    st.write(f"Avg Precipitation: {omaha_data['precipitation'].mean():.1f}mm")
-    st.write(f"Avg Max Wind Speed: {omaha_data['windspeed_max'].mean():.1f}km/h")
+    st.write(f"Avg Max Temp: {omaha_data['temperature_max'].mean():.1f}°F")
+    st.write(f"Avg Min Temp: {omaha_data['temperature_min'].mean():.1f}°F")
+    st.write(f"Avg Precipitation: {omaha_data['precipitation'].mean():.2f} inches")
+    st.write(f"Avg Max Wind Speed: {omaha_data['windspeed_max'].mean():.1f} mph")
     st.write(f"Avg Max Humidity: {omaha_data['humidity_max'].mean():.1f}%")
-
-# st.write("Data source: [Open-Meteo](https://open-meteo.com)")
