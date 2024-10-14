@@ -29,14 +29,26 @@ def fetch_weather_data(latitude, longitude, start_date, end_date):
     
     daily = response.Daily()
     daily_data = {
-        "date": pd.date_range(start=pd.to_datetime(daily.Time(), unit="s"), end=pd.to_datetime(daily.TimeEnd(), unit="s"), freq="D"),
-        "temperature_max": daily.Variables(0).ValuesAsNumpy(),
-        "temperature_min": daily.Variables(1).ValuesAsNumpy(),
-        "precipitation": daily.Variables(2).ValuesAsNumpy(),
-        "windspeed_max": daily.Variables(3).ValuesAsNumpy(),
-        "humidity_max": daily.Variables(4).ValuesAsNumpy()
+        "date": pd.date_range(start=pd.to_datetime(daily.Time(), unit="s"), end=pd.to_datetime(daily.TimeEnd(), unit="s"), freq="D")
     }
-    return pd.DataFrame(data=daily_data)
+    
+    variables = [
+        ("temperature_max", daily.Variables(0).ValuesAsNumpy()),
+        ("temperature_min", daily.Variables(1).ValuesAsNumpy()),
+        ("precipitation", daily.Variables(2).ValuesAsNumpy()),
+        ("windspeed_max", daily.Variables(3).ValuesAsNumpy()),
+        ("humidity_max", daily.Variables(4).ValuesAsNumpy())
+    ]
+    
+    for name, values in variables:
+        if len(values) == len(daily_data["date"]):
+            daily_data[name] = values
+        else:
+            # If lengths don't match, fill with NaN
+            daily_data[name] = [float('nan')] * len(daily_data["date"])
+    
+    df = pd.DataFrame(data=daily_data)
+    return df.dropna()  # Remove any rows with NaN values
 
 # Streamlit app
 st.title("Weather Comparison: Dallas vs Orlando")
